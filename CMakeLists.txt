@@ -1,11 +1,18 @@
 cmake_minimum_required(VERSION 3.14)
+
+# Set CMake policies
 cmake_policy(SET CMP0076 NEW)
-# cmake 3.15+ make_policy(SET CMP0091 NEW)
+# For CMake 3.15 and above, set CMP0091 policy
+# Uncomment the next line if CMake version >= 3.15
+# cmake_policy(SET CMP0091 NEW)
 
 include(cmake/variables.cmake)
 
+# Fetch ROOT_PATH from environment
 set(ROOT_PATH $ENV{ROOT_PATH})
+
 if (ROOT_PATH)
+    # Ensure build_win64 and build_osx are defined
     if (build_win64)
         get_filename_component(libs_loc "${ROOT_PATH}/Libraries/win64" REALPATH)
     elseif (NOT APPLE OR build_osx)
@@ -13,6 +20,8 @@ if (ROOT_PATH)
     else()
         get_filename_component(libs_loc "${ROOT_PATH}/Libraries/macos" REALPATH)
     endif()
+else()
+    message(FATAL_ERROR "ROOT_PATH environment variable is not set.")
 endif()
 
 include(cmake/validate_special_target.cmake)
@@ -21,20 +30,22 @@ project(tgcalls
     LANGUAGES C CXX
     DESCRIPTION "Python binding for tgcalls"
     HOMEPAGE_URL "https://github.com/MarshalX/tgcalls"
-    VERSION "3.0.0.6"
+    VERSION "3.0.0"  # Adjusted version format
 )
 
+# Define directories
 get_filename_component(third_party_loc "tgcalls/third_party" REALPATH)
 get_filename_component(src_loc "tgcalls/src" REALPATH)
 
+# Include additional CMake scripts
 include(cmake/nice_target_sources.cmake)
 include(cmake/target_link_static_libraries.cmake)
 include(cmake/target_link_frameworks.cmake)
 include(cmake/init_target.cmake)
 include(cmake/generate_target.cmake)
-
 include(cmake/options.cmake)
 
+# Add external dependencies
 add_subdirectory(${third_party_loc}/pybind11)
 
 add_subdirectory(cmake/external/jpeg)
@@ -42,4 +53,5 @@ add_subdirectory(cmake/external/openssl)
 add_subdirectory(cmake/external/opus)
 add_subdirectory(cmake/external/webrtc)
 
+# Add main tgcalls directory
 add_subdirectory(tgcalls)
